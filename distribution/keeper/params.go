@@ -3,8 +3,8 @@ package keeper
 import (
 	"cosmossdk.io/math"
 
+	"github.com/andromedaprotocol/andromedad/x/distribution/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/distribution/types"
 )
 
 // GetParams returns the total set of distribution parameters.
@@ -44,4 +44,9 @@ func (k Keeper) GetCommunityTax(ctx sdk.Context) math.LegacyDec {
 // enabled parameter.
 func (k Keeper) GetWithdrawAddrEnabled(ctx sdk.Context) (enabled bool) {
 	return k.GetParams(ctx).WithdrawAddrEnabled
+}
+
+// Get RewardsPerBlock returns the current distribution rewards per block
+func (k Keeper) GetRewardsPerBlock(ctx sdk.Context) math.LegacyDec {
+	return k.GetParams(ctx).RewardsPerBlock
 }

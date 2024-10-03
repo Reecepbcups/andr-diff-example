@@ -7,12 +7,12 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
+	"github.com/andromedaprotocol/andromedad/x/distribution/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/version"
-	"github.com/cosmos/cosmos-sdk/x/distribution/types"
 )
 
 // Transaction flags for the x/distribution module
@@ -40,6 +40,7 @@ func NewTxCmd() *cobra.Command {
 		NewWithdrawAllRewardsCmd(),
 		NewSetWithdrawAddrCmd(),
 		NewFundCommunityPoolCmd(),
+		NewFundRewardsPoolCmd(),
 	)
 
 	return distTxCmd
@@ -252,5 +253,40 @@ $ %s tx distribution fund-community-pool 100uatom --from mykey
 
 	flags.AddTxFlagsToCmd(cmd)
 
+	return cmd
+}
+
+// NewFundRewardsPoolCmd returns a CLI command handler for creating a MsgFundRewardsPool transaction.
+func NewFundRewardsPoolCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "fund-rewards-pool [amount]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Funds the rewards pool with the specified amount",
+		Long: strings.TrimSpace(
+			fmt.Sprintf(`Funds the community pool with the specified amount
+
+Example:
+$ %s tx distribution fund-rewards-pool 100uandr --from mykey
+`,
+				version.AppName,
+			),
+		),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+			depositorAddr := clientCtx.GetFromAddress()
+			amount, err := sdk.ParseCoinsNormalized(args[0])
+			if err != nil {
+				return err
+			}
+
+			msg := types.NewMsgFundRewardsPool(amount, depositorAddr)
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
+		},
+	}
+	flags.AddTxFlagsToCmd(cmd)
 	return cmd
 }

@@ -16,6 +16,8 @@ func DefaultParams() Params {
 		BaseProposerReward:  sdk.ZeroDec(),            // deprecated
 		BonusProposerReward: sdk.ZeroDec(),            // deprecated
 		WithdrawAddrEnabled: true,
+		// Rewards Per Block default is 0
+		RewardsPerBlock: sdk.ZeroDec(), // 0%
 	}
 }
 

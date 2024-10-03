@@ -7,11 +7,11 @@ import (
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"gotest.tools/v3/assert"
 
+	"github.com/andromedaprotocol/andromedad/x/distribution/simulation"
+	"github.com/andromedaprotocol/andromedad/x/distribution/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/address"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
-	"github.com/cosmos/cosmos-sdk/x/distribution/simulation"
-	"github.com/cosmos/cosmos-sdk/x/distribution/types"
 )
 
 func TestProposalMsgs(t *testing.T) {

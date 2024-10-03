@@ -17,6 +17,9 @@ const (
 
 	// RouterKey is the message route for distribution
 	RouterKey = ModuleName
+
+	// RewardsDripperName is the module name constant for Rewards Dripper Module used in many places
+	RewardsDripperName = "rewards_dripper"
 )
 
 // Keys for distribution store

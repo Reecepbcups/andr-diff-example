@@ -5,10 +5,10 @@ import (
 
 	abci "github.com/cometbft/cometbft/abci/types"
 
+	"github.com/andromedaprotocol/andromedad/x/distribution/keeper"
+	"github.com/andromedaprotocol/andromedad/x/distribution/types"
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/distribution/keeper"
-	"github.com/cosmos/cosmos-sdk/x/distribution/types"
 )
 
 // BeginBlocker sets the proposer for determining distribution during endblock

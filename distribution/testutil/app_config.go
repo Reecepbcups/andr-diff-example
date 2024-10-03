@@ -1,21 +1,21 @@
 package testutil
 
 import (
+	_ "github.com/andromedaprotocol/andromedad/x/distribution"
 	_ "github.com/cosmos/cosmos-sdk/x/auth"
 	_ "github.com/cosmos/cosmos-sdk/x/auth/tx/config"
 	_ "github.com/cosmos/cosmos-sdk/x/bank"
 	_ "github.com/cosmos/cosmos-sdk/x/consensus"
-	_ "github.com/cosmos/cosmos-sdk/x/distribution"
 	_ "github.com/cosmos/cosmos-sdk/x/genutil"
 	_ "github.com/cosmos/cosmos-sdk/x/mint"
 	_ "github.com/cosmos/cosmos-sdk/x/params"
 	_ "github.com/cosmos/cosmos-sdk/x/staking"
 
 	"cosmossdk.io/core/appconfig"
+	distrtypes "github.com/andromedaprotocol/andromedad/x/distribution/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	consensustypes "github.com/cosmos/cosmos-sdk/x/consensus/types"
-	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
@@ -79,6 +79,8 @@ var AppConfig = appconfig.Compose(&appv1alpha1.Config{
 				ModuleAccountPermissions: []*authmodulev1.ModuleAccountPermission{
 					{Account: authtypes.FeeCollectorName},
 					{Account: distrtypes.ModuleName},
+					// set for reward dist
+					{Account: distrtypes.RewardsDripperName},
 					{Account: minttypes.ModuleName, Permissions: []string{authtypes.Minter}},
 					{Account: stakingtypes.BondedPoolName, Permissions: []string{authtypes.Burner, stakingtypes.ModuleName}},
 					{Account: stakingtypes.NotBondedPoolName, Permissions: []string{authtypes.Burner, stakingtypes.ModuleName}},
