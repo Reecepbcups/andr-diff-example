@@ -1,74 +1,74 @@
 syntax = "proto3";
-package cosmos.distribution.v1beta1;
+package andromeda.distribution.v1beta1;
 
 import "cosmos/base/query/v1beta1/pagination.proto";
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
 import "cosmos/base/v1beta1/coin.proto";
-import "cosmos/distribution/v1beta1/distribution.proto";
+import "andromeda/distribution/v1beta1/distribution.proto";
 import "cosmos_proto/cosmos.proto";
 import "amino/amino.proto";
 
-option go_package = "github.com/cosmos/cosmos-sdk/x/distribution/types";
+option go_package = "github.com/andromedaprotocol/andromedad/x/distribution/types";
 
 // Query defines the gRPC querier service for distribution module.
 service Query {
   // Params queries params of the distribution module.
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
-    option (google.api.http).get = "/cosmos/distribution/v1beta1/params";
+    option (google.api.http).get = "/andromeda/distribution/v1beta1/params";
   }
 
   // ValidatorDistributionInfo queries validator commission and self-delegation rewards for validator
   rpc ValidatorDistributionInfo(QueryValidatorDistributionInfoRequest)
       returns (QueryValidatorDistributionInfoResponse) {
-    option (google.api.http).get = "/cosmos/distribution/v1beta1/validators/{validator_address}";
+    option (google.api.http).get = "/andromeda/distribution/v1beta1/validators/{validator_address}";
   }
 
   // ValidatorOutstandingRewards queries rewards of a validator address.
   rpc ValidatorOutstandingRewards(QueryValidatorOutstandingRewardsRequest)
       returns (QueryValidatorOutstandingRewardsResponse) {
-    option (google.api.http).get = "/cosmos/distribution/v1beta1/validators/"
+    option (google.api.http).get = "/andromeda/distribution/v1beta1/validators/"
                                    "{validator_address}/outstanding_rewards";
   }
 
   // ValidatorCommission queries accumulated commission for a validator.
   rpc ValidatorCommission(QueryValidatorCommissionRequest) returns (QueryValidatorCommissionResponse) {
-    option (google.api.http).get = "/cosmos/distribution/v1beta1/validators/"
+    option (google.api.http).get = "/andromeda/distribution/v1beta1/validators/"
                                    "{validator_address}/commission";
   }
 
   // ValidatorSlashes queries slash events of a validator.
   rpc ValidatorSlashes(QueryValidatorSlashesRequest) returns (QueryValidatorSlashesResponse) {
-    option (google.api.http).get = "/cosmos/distribution/v1beta1/validators/{validator_address}/slashes";
+    option (google.api.http).get = "/andromeda/distribution/v1beta1/validators/{validator_address}/slashes";
   }
 
   // DelegationRewards queries the total rewards accrued by a delegation.
   rpc DelegationRewards(QueryDelegationRewardsRequest) returns (QueryDelegationRewardsResponse) {
-    option (google.api.http).get = "/cosmos/distribution/v1beta1/delegators/{delegator_address}/rewards/"
+    option (google.api.http).get = "/andromeda/distribution/v1beta1/delegators/{delegator_address}/rewards/"
                                    "{validator_address}";
   }
 
-  // DelegationTotalRewards queries the total rewards accrued by each
+  // DelegationTotalRewards queries the total rewards accrued by a each
   // validator.
   rpc DelegationTotalRewards(QueryDelegationTotalRewardsRequest) returns (QueryDelegationTotalRewardsResponse) {
-    option (google.api.http).get = "/cosmos/distribution/v1beta1/delegators/{delegator_address}/rewards";
+    option (google.api.http).get = "/andromeda/distribution/v1beta1/delegators/{delegator_address}/rewards";
   }
 
   // DelegatorValidators queries the validators of a delegator.
   rpc DelegatorValidators(QueryDelegatorValidatorsRequest) returns (QueryDelegatorValidatorsResponse) {
-    option (google.api.http).get = "/cosmos/distribution/v1beta1/delegators/"
+    option (google.api.http).get = "/andromeda/distribution/v1beta1/delegators/"
                                    "{delegator_address}/validators";
   }
 
   // DelegatorWithdrawAddress queries withdraw address of a delegator.
   rpc DelegatorWithdrawAddress(QueryDelegatorWithdrawAddressRequest) returns (QueryDelegatorWithdrawAddressResponse) {
-    option (google.api.http).get = "/cosmos/distribution/v1beta1/delegators/"
+    option (google.api.http).get = "/andromeda/distribution/v1beta1/delegators/"
                                    "{delegator_address}/withdraw_address";
   }
 
   // CommunityPool queries the community pool coins.
   rpc CommunityPool(QueryCommunityPoolRequest) returns (QueryCommunityPoolResponse) {
-    option (google.api.http).get = "/cosmos/distribution/v1beta1/community_pool";
+    option (google.api.http).get = "/andromeda/distribution/v1beta1/community_pool";
   }
 }
 
@@ -84,13 +84,13 @@ message QueryParamsResponse {
 // QueryValidatorDistributionInfoRequest is the request type for the Query/ValidatorDistributionInfo RPC method.
 message QueryValidatorDistributionInfoRequest {
   // validator_address defines the validator address to query for.
-  string validator_address = 1 [(cosmos_proto.scalar) = "cosmos.ValidatorAddressString"];
+  string validator_address = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
 }
 
 // QueryValidatorDistributionInfoResponse is the response type for the Query/ValidatorDistributionInfo RPC method.
 message QueryValidatorDistributionInfoResponse {
   // operator_address defines the validator operator address.
-  string operator_address = 1 [(cosmos_proto.scalar) = "cosmos.ValidatorAddressString"];
+  string operator_address = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   // self_bond_rewards defines the self delegations rewards.
   repeated cosmos.base.v1beta1.DecCoin self_bond_rewards = 2 [
     (gogoproto.nullable)     = false,
@@ -106,7 +106,7 @@ message QueryValidatorDistributionInfoResponse {
 // Query/ValidatorOutstandingRewards RPC method.
 message QueryValidatorOutstandingRewardsRequest {
   // validator_address defines the validator address to query for.
-  string validator_address = 1 [(cosmos_proto.scalar) = "cosmos.ValidatorAddressString"];
+  string validator_address = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
 }
 
 // QueryValidatorOutstandingRewardsResponse is the response type for the
@@ -119,7 +119,7 @@ message QueryValidatorOutstandingRewardsResponse {
 // Query/ValidatorCommission RPC method
 message QueryValidatorCommissionRequest {
   // validator_address defines the validator address to query for.
-  string validator_address = 1 [(cosmos_proto.scalar) = "cosmos.ValidatorAddressString"];
+  string validator_address = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
 }
 
 // QueryValidatorCommissionResponse is the response type for the
@@ -132,10 +132,11 @@ message QueryValidatorCommissionResponse {
 // QueryValidatorSlashesRequest is the request type for the
 // Query/ValidatorSlashes RPC method
 message QueryValidatorSlashesRequest {
-  option (gogoproto.goproto_getters) = false;
+  option (gogoproto.goproto_getters)  = false;
+  option (gogoproto.goproto_stringer) = true;
 
   // validator_address defines the validator address to query for.
-  string validator_address = 1 [(cosmos_proto.scalar) = "cosmos.ValidatorAddressString"];
+  string validator_address = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   // starting_height defines the optional starting height to query the slashes.
   uint64 starting_height = 2;
   // starting_height defines the optional ending height to query the slashes.
@@ -163,7 +164,7 @@ message QueryDelegationRewardsRequest {
   // delegator_address defines the delegator address to query for.
   string delegator_address = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   // validator_address defines the validator address to query for.
-  string validator_address = 2 [(cosmos_proto.scalar) = "cosmos.ValidatorAddressString"];
+  string validator_address = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
 }
 
 // QueryDelegationRewardsResponse is the response type for the
