@@ -9,15 +9,15 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 
+	"github.com/andromedaprotocol/andromedad/x/distribution"
+	"github.com/andromedaprotocol/andromedad/x/distribution/keeper"
+	distrtestutil "github.com/andromedaprotocol/andromedad/x/distribution/testutil"
+	"github.com/andromedaprotocol/andromedad/x/distribution/types"
 	"github.com/cosmos/cosmos-sdk/testutil"
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	moduletestutil "github.com/cosmos/cosmos-sdk/types/module/testutil"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	"github.com/cosmos/cosmos-sdk/x/distribution"
-	"github.com/cosmos/cosmos-sdk/x/distribution/keeper"
-	distrtestutil "github.com/cosmos/cosmos-sdk/x/distribution/testutil"
-	"github.com/cosmos/cosmos-sdk/x/distribution/types"
 )
 
 func TestSetWithdrawAddr(t *testing.T) {

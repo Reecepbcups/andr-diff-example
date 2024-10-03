@@ -10,14 +10,14 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 
+	"github.com/andromedaprotocol/andromedad/x/distribution"
+	"github.com/andromedaprotocol/andromedad/x/distribution/keeper"
+	distrtestutil "github.com/andromedaprotocol/andromedad/x/distribution/testutil"
+	disttypes "github.com/andromedaprotocol/andromedad/x/distribution/types"
 	"github.com/cosmos/cosmos-sdk/testutil"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	moduletestutil "github.com/cosmos/cosmos-sdk/types/module/testutil"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	"github.com/cosmos/cosmos-sdk/x/distribution"
-	"github.com/cosmos/cosmos-sdk/x/distribution/keeper"
-	distrtestutil "github.com/cosmos/cosmos-sdk/x/distribution/testutil"
-	disttypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
@@ -33,6 +33,8 @@ func TestAllocateTokensToValidatorWithCommission(t *testing.T) {
 	accountKeeper := distrtestutil.NewMockAccountKeeper(ctrl)
 
 	accountKeeper.EXPECT().GetModuleAddress("distribution").Return(distrAcc.GetAddress())
+	// set rewards dripper module
+	accountKeeper.EXPECT().GetModuleAddress("rewards_dripper").Return(rewardsAcc.GetAddress())
 
 	distrKeeper := keeper.NewKeeper(
 		encCfg.Codec,
@@ -80,6 +82,8 @@ func TestAllocateTokensToManyValidators(t *testing.T) {
 	feeCollectorAcc := authtypes.NewEmptyModuleAccount("fee_collector")
 	accountKeeper.EXPECT().GetModuleAddress("distribution").Return(distrAcc.GetAddress())
 	accountKeeper.EXPECT().GetModuleAccount(gomock.Any(), "fee_collector").Return(feeCollectorAcc)
+	// set for rewards dripper module
+	accountKeeper.EXPECT().GetModuleAddress("rewards_dripper").Return(rewardsAcc.GetAddress())
 
 	distrKeeper := keeper.NewKeeper(
 		encCfg.Codec,

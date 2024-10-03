@@ -12,6 +12,9 @@ import (
 	"github.com/cosmos/gogoproto/proto"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/andromedaprotocol/andromedad/x/distribution/client/cli"
+	distrclitestutil "github.com/andromedaprotocol/andromedad/x/distribution/client/testutil"
+	distrtestutil "github.com/andromedaprotocol/andromedad/x/distribution/testutil"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
@@ -21,9 +24,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	testutilmod "github.com/cosmos/cosmos-sdk/types/module/testutil"
 	"github.com/cosmos/cosmos-sdk/x/bank"
-	"github.com/cosmos/cosmos-sdk/x/distribution/client/cli"
-	distrclitestutil "github.com/cosmos/cosmos-sdk/x/distribution/client/testutil"
-	distrtestutil "github.com/cosmos/cosmos-sdk/x/distribution/testutil"
 	"github.com/cosmos/cosmos-sdk/x/gov"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 )

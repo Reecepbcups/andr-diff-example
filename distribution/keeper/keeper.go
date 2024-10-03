@@ -5,11 +5,11 @@ import (
 
 	"github.com/cometbft/cometbft/libs/log"
 
+	"github.com/andromedaprotocol/andromedad/x/distribution/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/cosmos/cosmos-sdk/x/distribution/types"
 )
 
 // Keeper of the distribution store
@@ -35,6 +35,11 @@ func NewKeeper(
 	// ensure distribution module account is set
 	if addr := ak.GetModuleAddress(types.ModuleName); addr == nil {
 		panic(fmt.Sprintf("%s module account has not been set", types.ModuleName))
+	}
+
+	// ensure rewards dripper module account is set
+	if addr := ak.GetModuleAddress(types.RewardsDripperName); addr == nil {
+		panic(fmt.Sprintf("%s module account has not been set", types.RewardsDripperName))
 	}
 
 	return Keeper{
@@ -65,7 +70,7 @@ func (k Keeper) SetWithdrawAddr(ctx sdk.Context, delegatorAddr sdk.AccAddress, w
 	}
 
 	if !k.GetWithdrawAddrEnabled(ctx) {
-		return types.ErrSetWithdrawAddrDisabled
+		return fmt.Errorf("withdraw address functionality is disabled")
 	}
 
 	ctx.EventManager().EmitEvent(
@@ -83,12 +88,12 @@ func (k Keeper) SetWithdrawAddr(ctx sdk.Context, delegatorAddr sdk.AccAddress, w
 func (k Keeper) WithdrawDelegationRewards(ctx sdk.Context, delAddr sdk.AccAddress, valAddr sdk.ValAddress) (sdk.Coins, error) {
 	val := k.stakingKeeper.Validator(ctx, valAddr)
 	if val == nil {
-		return nil, types.ErrNoValidatorDistInfo
+		return nil, fmt.Errorf("validator %s not found", valAddr)
 	}
 
 	del := k.stakingKeeper.Delegation(ctx, delAddr, valAddr)
 	if del == nil {
-		return nil, types.ErrEmptyDelegationDistInfo
+		return nil, fmt.Errorf("delegation from %s to %s not found", delAddr, valAddr)
 	}
 
 	// withdraw rewards
@@ -107,7 +112,7 @@ func (k Keeper) WithdrawValidatorCommission(ctx sdk.Context, valAddr sdk.ValAddr
 	// fetch validator accumulated commission
 	accumCommission := k.GetValidatorAccumulatedCommission(ctx, valAddr)
 	if accumCommission.Commission.IsZero() {
-		return nil, types.ErrNoValidatorCommission
+		return nil, fmt.Errorf("no commission to withdraw")
 	}
 
 	commission, remainder := accumCommission.Commission.TruncateDecimal()
@@ -161,5 +166,17 @@ func (k Keeper) FundCommunityPool(ctx sdk.Context, amount sdk.Coins, sender sdk.
 	feePool.CommunityPool = feePool.CommunityPool.Add(sdk.NewDecCoinsFromCoins(amount...)...)
 	k.SetFeePool(ctx, feePool)
 
+	return nil
+}
+
+// FundRewardsPool allows an account to directly fund the rewards pool.
+// The amount is directly sent from the sender to the rewards pool module address.
+// An error is returned if the amount cannot be sent to the rewards pool module account.
+// As soon as the rewards pool receives the tokens, the next block it starts to distribute them
+// according to the distribution params set.s
+func (k Keeper) FundRewardsPool(ctx sdk.Context, amount sdk.Coins, sender sdk.AccAddress) error {
+	if err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, sender, types.RewardsDripperName, amount); err != nil {
+		return err
+	}
 	return nil
 }

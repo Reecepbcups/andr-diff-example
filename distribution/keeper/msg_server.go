@@ -5,10 +5,10 @@ import (
 
 	"github.com/armon/go-metrics"
 
+	"github.com/andromedaprotocol/andromedad/x/distribution/types"
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/cosmos/cosmos-sdk/x/distribution/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 )
 
@@ -113,6 +113,20 @@ func (k msgServer) FundCommunityPool(goCtx context.Context, msg *types.MsgFundCo
 	}
 
 	return &types.MsgFundCommunityPoolResponse{}, nil
+}
+
+func (k msgServer) FundRewardsPool(goCtx context.Context, msg *types.MsgFundRewardsPool) (*types.MsgFundRewardsPoolResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	depositer, err := sdk.AccAddressFromBech32(msg.Depositor)
+	if err != nil {
+		return nil, err
+	}
+	if err := k.Keeper.FundRewardsPool(ctx, msg.Amount, depositer); err != nil {
+		return nil, err
+	}
+
+	return &types.MsgFundRewardsPoolResponse{}, nil
 }
 
 func (k msgServer) UpdateParams(goCtx context.Context, req *types.MsgUpdateParams) (*types.MsgUpdateParamsResponse, error) {

@@ -4,8 +4,8 @@ import (
 	"cosmossdk.io/math"
 	abci "github.com/cometbft/cometbft/abci/types"
 
+	"github.com/andromedaprotocol/andromedad/x/distribution/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/distribution/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
@@ -19,12 +19,48 @@ func (k Keeper) AllocateTokens(ctx sdk.Context, totalPreviousPower int64, bonded
 	feesCollectedInt := k.bankKeeper.GetAllBalances(ctx, feeCollector.GetAddress())
 	feesCollected := sdk.NewDecCoinsFromCoins(feesCollectedInt...)
 
+	// Fetch the RewardsDripper module account
+	rewardsDripper := k.authKeeper.GetModuleAccount(ctx, types.RewardsDripperName)
+	// Fetch the rewards dripper balance
+	rewardsDripperBalance := k.bankKeeper.GetAllBalances(ctx, rewardsDripper.GetAddress())
+	// Convert rewardsDripperBalance to DecCoins
+	rewardsDripperCollected := sdk.NewDecCoinsFromCoins(rewardsDripperBalance...)
+
 	// transfer collected fees to the distribution module account
 	err := k.bankKeeper.SendCoinsFromModuleToModule(ctx, k.feeCollectorName, types.ModuleName, feesCollectedInt)
 	if err != nil {
 		panic(err)
 	}
 
+	// Calculate rewards to be dripped this block from Param set
+	rewardsToDrip := k.GetRewardsPerBlock(ctx)
+
+	// If rewardsToDrip is nil set to 0
+	if rewardsToDrip.IsNil() {
+
+		rewardsToDrip = sdk.ZeroDec()
+
+	}
+
+	// Create new coins with the denoms of the rewardsDripperBalance and the amount of rewards to be dripped
+	rewardsCoins := make(sdk.Coins, len(rewardsDripperBalance))
+	for i, coin := range rewardsDripperBalance {
+		rewardsCoins[i] = sdk.NewCoin(coin.Denom, rewardsToDrip.TruncateInt())
+	}
+
+	// Convert to DecCoins
+	rewardsToDripDec := sdk.NewDecCoinsFromCoins(rewardsCoins...)
+
+	// Intersect balance of rewardsDripper with rewardsToDripDec to find the amount to be dripped
+	rewardsToDripDec = rewardsToDripDec.Intersect(rewardsDripperCollected)
+
+	// Convert rewardsToDripDec to Coins
+	rewardsToDripInt, _ := rewardsToDripDec.TruncateDecimal()
+
+	// transfer rewards to be dripped to the distribution module account
+	if err := k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.RewardsDripperName, types.ModuleName, rewardsToDripInt); err != nil {
+		panic(err)
+	}
 	// temporary workaround to keep CanWithdrawInvariant happy
 	// general discussions here: https://github.com/cosmos/cosmos-sdk/issues/2906#issuecomment-441867634
 	feePool := k.GetFeePool(ctx)
@@ -34,11 +70,16 @@ func (k Keeper) AllocateTokens(ctx sdk.Context, totalPreviousPower int64, bonded
 		return
 	}
 
+	// Combine all rewards
+	allCollected := feesCollected.Add(rewardsToDripDec...)
 	// calculate fraction allocated to validators
-	remaining := feesCollected
+	remaining := allCollected
 	communityTax := k.GetCommunityTax(ctx)
 	voteMultiplier := math.LegacyOneDec().Sub(communityTax)
 	feeMultiplier := feesCollected.MulDecTruncate(voteMultiplier)
+	// To avoid adding a community tax to rewards to be dripped we add the rewardsToDripDec to the feeMultiplier
+	// We DO NOT want to re-tax funds that already come from the pool as these are basely rewards
+	feeMultiplier = feeMultiplier.Add(rewardsToDripDec...)
 
 	// allocate tokens proportionally to voting power
 	//

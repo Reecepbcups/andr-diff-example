@@ -1,10 +1,10 @@
 package keeper_test
 
 import (
+	"github.com/andromedaprotocol/andromedad/x/distribution/types"
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	"github.com/cosmos/cosmos-sdk/x/distribution/types"
 )
 
 var (
@@ -18,5 +18,6 @@ var (
 	valConsAddr1 = sdk.ConsAddress(valConsPk1.Address())
 	valConsAddr2 = sdk.ConsAddress(valConsPk2.Address())
 
-	distrAcc = authtypes.NewEmptyModuleAccount(types.ModuleName)
+	distrAcc   = authtypes.NewEmptyModuleAccount(types.ModuleName)
+	rewardsAcc = authtypes.NewEmptyModuleAccount(types.RewardsDripperName)
 )

@@ -2,19 +2,20 @@ package keeper
 
 import (
 	"context"
+	"fmt"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	"github.com/andromedaprotocol/andromedad/x/distribution/types"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/query"
-	"github.com/cosmos/cosmos-sdk/x/distribution/types"
+	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
-var _ types.QueryServer = Querier{}
+var q types.QueryServer = Querier{}
 
 type Querier struct {
 	Keeper
@@ -52,14 +53,14 @@ func (k Querier) ValidatorDistributionInfo(c context.Context, req *types.QueryVa
 	// self-delegation rewards
 	val := k.stakingKeeper.Validator(ctx, valAdr)
 	if val == nil {
-		return nil, sdkerrors.Wrap(types.ErrNoValidatorExists, req.ValidatorAddress)
+		return nil, fmt.Errorf("validator not found for address %s", req.ValidatorAddress)
 	}
 
 	delAdr := sdk.AccAddress(valAdr)
 
 	del := k.stakingKeeper.Delegation(ctx, delAdr, valAdr)
 	if del == nil {
-		return nil, types.ErrNoDelegationExists
+		return nil, fmt.Errorf("delegation not found for delegator %s to validator %s", delAdr, valAdr)
 	}
 
 	endingPeriod := k.IncrementValidatorPeriod(ctx, val)
@@ -183,7 +184,7 @@ func (k Querier) DelegationRewards(c context.Context, req *types.QueryDelegation
 
 	val := k.stakingKeeper.Validator(ctx, valAdr)
 	if val == nil {
-		return nil, sdkerrors.Wrap(types.ErrNoValidatorExists, req.ValidatorAddress)
+		return nil, fmt.Errorf("validator not found for address %s", req.ValidatorAddress)
 	}
 
 	delAdr, err := sdk.AccAddressFromBech32(req.DelegatorAddress)
@@ -192,7 +193,7 @@ func (k Querier) DelegationRewards(c context.Context, req *types.QueryDelegation
 	}
 	del := k.stakingKeeper.Delegation(ctx, delAdr, valAdr)
 	if del == nil {
-		return nil, types.ErrNoDelegationExists
+		return nil, fmt.Errorf("delegation not found for delegator %s to validator %s", req.DelegatorAddress, req.ValidatorAddress)
 	}
 
 	endingPeriod := k.IncrementValidatorPeriod(ctx, val)
@@ -292,4 +293,26 @@ func (k Querier) CommunityPool(c context.Context, req *types.QueryCommunityPoolR
 	pool := k.GetFeePoolCommunityCoins(ctx)
 
 	return &types.QueryCommunityPoolResponse{Pool: pool}, nil
+}
+
+// Create Adapter for distribution querier
+type QuerierAdapter struct {
+	Querier
+}
+
+// DelegationRewards the total rewards accrued by a delegation
+func (k QuerierAdapter) DelegationRewards(c context.Context, req *distrtypes.QueryDelegationRewardsRequest) (*distrtypes.QueryDelegationRewardsResponse, error) {
+	// Convert request from othertypes to distrtypes
+	convertedReq := *&types.QueryDelegationRewardsRequest{}
+	convertedReq.DelegatorAddress = req.DelegatorAddress
+	convertedReq.ValidatorAddress = req.ValidatorAddress
+	// Call the original Querier method
+	originalResp, err := k.Querier.DelegationRewards(c, &convertedReq)
+	if err != nil {
+		return nil, err
+	}
+
+	convertedResp := &distrtypes.QueryDelegationRewardsResponse{}
+	convertedResp.Rewards = originalResp.Rewards
+	return convertedResp, nil
 }
